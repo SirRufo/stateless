@@ -207,6 +207,7 @@ end;
 procedure TStateRepresentationFixture.Teardown;
 begin
   FreeAndNil( stateRepresentation );
+  FreeAndNil( stateRepresentationOther );
   FreeAndNil( super );
   FreeAndNil( sub );
 end;
