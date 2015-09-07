@@ -4,6 +4,7 @@ program PhoneCall;
 {$R *.res}
 
 uses
+  System.Diagnostics,
   System.SysUtils,
   Stateless;
 
@@ -15,6 +16,8 @@ type
   TPhoneCall = TStateMachine<State, Trigger>;
 
 procedure ConfigurePhoneCall( PhoneCall: TPhoneCall );
+var
+  LCallTimer: TStopwatch;
 begin
   PhoneCall.Configure( State.OffHook )
   {} .Permit( Trigger.CallDialed, State.Ringing );
@@ -28,10 +31,13 @@ begin
   {} .OnEntry(
     procedure( t: TPhoneCall.TTransition )
     begin
+      LCallTimer := TStopwatch.StartNew;
     end )
   {} .OnExit(
     procedure( t: TPhoneCall.TTransition )
     begin
+      LCallTimer.Stop;
+      WriteLn( 'Duration: ', LCallTimer.ElapsedMilliseconds, 'ms' );
     end );
 
   PhoneCall.Configure( State.Active )
@@ -47,31 +53,30 @@ end;
 
 procedure Test;
 var
-  LCall     : TPhoneCall;
-  LPermitted: TArray<Trigger>;
+  LCall: TPhoneCall;
 begin
   LCall := TPhoneCall.Create( State.OffHook );
   try
     ConfigurePhoneCall( LCall );
-    Writeln( LCall.ToString );
+    WriteLn( LCall.ToString );
 
     LCall.Fire( Trigger.CallDialed );
-    Writeln( LCall.ToString );
+    WriteLn( LCall.ToString );
 
     LCall.Fire( Trigger.CallConnected );
-    Writeln( LCall.ToString );
+    WriteLn( LCall.ToString );
 
     LCall.Fire( Trigger.PlacedOnHold );
-    Writeln( LCall.ToString );
+    WriteLn( LCall.ToString );
 
     LCall.Fire( Trigger.TakenOffHold );
-    Writeln( LCall.ToString );
+    WriteLn( LCall.ToString );
 
     LCall.Fire( Trigger.PlacedOnHold );
-    Writeln( LCall.ToString );
+    WriteLn( LCall.ToString );
 
     LCall.Fire( Trigger.HungUp );
-    Writeln( LCall.ToString );
+    WriteLn( LCall.ToString );
 
   finally
     LCall.Free;
@@ -83,7 +88,7 @@ begin
     Test;
   except
     on E: Exception do
-      Writeln( E.ClassName, ': ', E.Message );
+      WriteLn( E.ClassName, ': ', E.Message );
   end;
   ReadLn;
 
