@@ -51,13 +51,31 @@ type
     [ Test ]
     procedure IsIncludedInSuperstate( );
     [ Test ]
+    procedure WhenTransitioningFromSubToSuperstate_SubstateEntryActionsExecuted( );
+    [ Test ]
+    procedure WhenTransitioningFromSubToSuperstate_SubstateExitActionsExecuted( );
+    [ Test ]
+    procedure WhenTransitioningToSuperFromSubstate_SuperEntryActionsNotExecuted( );
+    [ Test ]
+    procedure WhenTransitioningFromSuperToSubstate_SuperExitActionsNotExecuted( );
+    [ Test ]
+    procedure WhenEnteringSubstate_SuperEntryActionsExecuted( );
+    [ Test ]
+    procedure WhenLeavingSubstate_SuperExitActionsExecuted( );
+    [ Test ]
+    procedure EntryActionsExecuteInOrder( );
+    [ Test ]
+    procedure ExitActionsExecuteInOrder( );
+    [ Test ]
+    procedure WhenTransitionExists_TriggerCanBeFired( );
+    [ Test ]
+    procedure WhenTransitionDoesNotExist_TriggerCannotBeFired( );
+    [ Test ]
+    procedure WhenTransitionExistsInSupersate_TriggerCanBeFired( );
+    [ Test ]
     procedure WhenEnteringSubstate_SuperstateEntryActionsExecuteBeforeSubstate( );
     [ Test ]
     procedure WhenExitingSubstate_SubstateEntryActionsExecuteBeforeSuperstate( );
-    [ Test ]
-    procedure WhenEnteringSuperstateFromSubstate_SuperstateEntryActionsAreNotExecuted( );
-    [ Test ]
-    procedure WhenExitingSubstateToSuperstate_SuperstateExitActionsAreNotExecuted( );
   end;
 
 implementation
@@ -89,6 +107,48 @@ procedure TStateRepresentationFixture.DoesNotIncludeUnrelatedState;
 begin
   stateRepresentation := CreateRepresentation( TState.B );
   Assert.IsFalse( stateRepresentation.Includes( TState.C ) );
+end;
+
+procedure TStateRepresentationFixture.EntryActionsExecuteInOrder;
+var
+  actual: TArray<Integer>;
+begin
+  stateRepresentation := CreateRepresentation( TState.B );
+  stateRepresentation.AddEntryAction(
+    procedure( t: TTransition; A: TValueArguments )
+    begin
+      actual := actual + [ 0 ];
+    end );
+  stateRepresentation.AddEntryAction(
+    procedure( t: TTransition; A: TValueArguments )
+    begin
+      actual := actual + [ 1 ];
+    end );
+  stateRepresentation.Enters( TTransition.Create( TState.A, TState.B, TTrigger.X, stateComparer ), [ ] );
+  Assert.AreEqual( 2, Length( actual ) );
+  Assert.AreEqual( 0, actual[ 0 ] );
+  Assert.AreEqual( 1, actual[ 1 ] );
+end;
+
+procedure TStateRepresentationFixture.ExitActionsExecuteInOrder;
+var
+  actual: TArray<Integer>;
+begin
+  stateRepresentation := CreateRepresentation( TState.B );
+  stateRepresentation.AddExitAction(
+    procedure( t: TTransition )
+    begin
+      actual := actual + [ 0 ];
+    end );
+  stateRepresentation.AddExitAction(
+    procedure( t: TTransition )
+    begin
+      actual := actual + [ 1 ];
+    end );
+  stateRepresentation.Exits( TTransition.Create( TState.B, TState.A, TTrigger.X, stateComparer ) );
+  Assert.AreEqual( 2, Length( actual ) );
+  Assert.AreEqual( 0, actual[ 0 ] );
+  Assert.AreEqual( 1, actual[ 1 ] );
 end;
 
 procedure TStateRepresentationFixture.IncludesSubstate;
@@ -201,6 +261,23 @@ begin
   Assert.AreEqual( Transition, actualTransition.Value );
 end;
 
+procedure TStateRepresentationFixture.WhenEnteringSubstate_SuperEntryActionsExecuted;
+var
+  Executed  : Boolean;
+  Transition: TTransition;
+begin
+  CreateSuperSubstatePair( super, sub );
+  Executed := False;
+  super.AddEntryAction(
+    procedure( t: TTransition; A: TValueArguments )
+    begin
+      Executed := True;
+    end );
+  Transition := TTransition.Create( TState.C, sub.UnderlyingState, TTrigger.X, stateComparer );
+  sub.Enters( Transition, [ ] );
+  Assert.IsTrue( Executed );
+end;
+
 procedure TStateRepresentationFixture.WhenEnteringSubstate_SuperstateEntryActionsExecuteBeforeSubstate;
 var
   order, subOrder, superOrder: Integer;
@@ -227,7 +304,7 @@ begin
   Assert.IsTrue( superOrder < subOrder );
 end;
 
-procedure TStateRepresentationFixture.WhenEnteringSuperstateFromSubstate_SuperstateEntryActionsAreNotExecuted;
+procedure TStateRepresentationFixture.WhenTransitioningToSuperFromSubstate_SuperEntryActionsNotExecuted;
 var
   Executed  : Boolean;
   Transition: TTransition;
@@ -244,7 +321,7 @@ begin
   Assert.IsFalse( Executed );
 end;
 
-procedure TStateRepresentationFixture.WhenExitingSubstateToSuperstate_SuperstateExitActionsAreNotExecuted;
+procedure TStateRepresentationFixture.WhenTransitioningFromSuperToSubstate_SuperExitActionsNotExecuted;
 var
   Executed  : Boolean;
   Transition: TTransition;
@@ -285,6 +362,85 @@ begin
   Transition := TTransition.Create( sub.UnderlyingState, TState.C, TTrigger.X, stateComparer );
   sub.Exits( Transition );
   Assert.IsTrue( subOrder < superOrder );
+end;
+
+procedure TStateRepresentationFixture.WhenLeavingSubstate_SuperExitActionsExecuted;
+var
+  Executed  : Boolean;
+  Transition: TTransition;
+begin
+  CreateSuperSubstatePair( super, sub );
+  Executed := False;
+  super.AddExitAction(
+    procedure( t: TTransition )
+    begin
+      Executed := True;
+    end );
+  Transition := TTransition.Create( sub.UnderlyingState, TState.C, TTrigger.X, stateComparer );
+  sub.Exits( Transition );
+  Assert.IsTrue( Executed );
+end;
+
+procedure TStateRepresentationFixture.WhenTransitionDoesNotExist_TriggerCannotBeFired;
+begin
+  stateRepresentation := CreateRepresentation( TState.B );
+  Assert.IsFalse( stateRepresentation.CanHandle( TTrigger.X ) );
+end;
+
+procedure TStateRepresentationFixture.WhenTransitionExistsInSupersate_TriggerCanBeFired;
+begin
+  CreateSuperSubstatePair( super, sub );
+  super.AddTriggerBehaviour( TTestMachine.TIgnoredTriggerBehaviour.Create( TTrigger.X,
+    function: Boolean
+    begin
+      Result := True;
+    end ) );
+  Assert.IsTrue( sub.CanHandle( TTrigger.X ) );
+end;
+
+procedure TStateRepresentationFixture.WhenTransitionExists_TriggerCanBeFired;
+begin
+  stateRepresentation := CreateRepresentation( TState.B );
+  stateRepresentation.AddTriggerBehaviour( TTestMachine.TIgnoredTriggerBehaviour.Create( TTrigger.X,
+    function: Boolean
+    begin
+      Result := True;
+    end ) );
+  Assert.IsTrue( stateRepresentation.CanHandle( TTrigger.X ) );
+end;
+
+procedure TStateRepresentationFixture.WhenTransitioningFromSubToSuperstate_SubstateEntryActionsExecuted;
+var
+  Executed  : Boolean;
+  Transition: TTransition;
+begin
+  CreateSuperSubstatePair( super, sub );
+  Executed := False;
+  sub.AddEntryAction(
+    procedure( t: TTransition; A: TValueArguments )
+    begin
+      Executed := True;
+    end );
+  Transition := TTransition.Create( super.UnderlyingState, sub.UnderlyingState, TTrigger.X, stateComparer );
+  sub.Enters( Transition, [ ] );
+  Assert.IsTrue( Executed );
+end;
+
+procedure TStateRepresentationFixture.WhenTransitioningFromSubToSuperstate_SubstateExitActionsExecuted;
+var
+  Executed  : Boolean;
+  Transition: TTransition;
+begin
+  CreateSuperSubstatePair( super, sub );
+  Executed := False;
+  sub.AddExitAction(
+    procedure( t: TTransition )
+    begin
+      Executed := True;
+    end );
+  Transition := TTransition.Create( sub.UnderlyingState, super.UnderlyingState, TTrigger.X, stateComparer );
+  sub.Exits( Transition );
+  Assert.IsTrue( Executed );
 end;
 
 procedure TStateRepresentationFixture.UponEntering_LeavingActionsNotExecuted;
