@@ -106,8 +106,8 @@ type
       /// <param name="underlyingTrigger">Trigger represented by this trigger configuration.</param>
       /// <param name="argumentTypes">The argument types expected by the trigger.</param>
       constructor Create(
-        UnderlyingTrigger: TTrigger;
-        ArgumentTypes    : TArray<PTypeInfo> );
+        const UnderlyingTrigger: TTrigger;
+        const ArgumentTypes    : TArray<PTypeInfo> );
       /// <summary>
       /// Ensure that the supplied arguments are compatible with those configured for this
       /// trigger.
@@ -130,7 +130,7 @@ type
       /// Create a configured trigger.
       /// </summary>
       /// <param name="underlyingTrigger">Trigger represented by this trigger configuration.</param>
-      constructor Create( UnderlyingTrigger: TTrigger );
+      constructor Create( const UnderlyingTrigger: TTrigger );
     end;
 
     /// <summary>
@@ -144,7 +144,7 @@ type
       /// Create a configured trigger.
       /// </summary>
       /// <param name="underlyingTrigger">Trigger represented by this trigger configuration.</param>
-      constructor Create( UnderlyingTrigger: TTrigger );
+      constructor Create( const UnderlyingTrigger: TTrigger );
     end;
 
     /// <summary>
@@ -159,7 +159,7 @@ type
       /// Create a configured trigger.
       /// </summary>
       /// <param name="underlyingTrigger">Trigger represented by this trigger configuration.</param>
-      constructor Create( UnderlyingTrigger: TTrigger );
+      constructor Create( const UnderlyingTrigger: TTrigger );
     end;
 {$IFDEF UNITTEST}
     { this must be } public { for the unit testing }
@@ -759,7 +759,7 @@ type
     /// is fired.
     /// </summary>
     /// <param name="unhandledTriggerAction">An action to call when an unhandled trigger is fired.</param>
-    procedure OnUnhandledTriggerAction( UnhandledTriggerAction: TAction<TState, TTrigger> );
+    procedure OnUnhandledTriggerAction( const UnhandledTriggerAction: TAction<TState, TTrigger> );
     /// <summary>
     /// Specify the arguments that must be supplied when a specific trigger is fired.
     /// </summary>
@@ -939,10 +939,10 @@ end;
 
 procedure TStateMachine<TState, TTrigger>.OnTransitioned( const OnTransitionAction: TTransitionAction );
 begin
-  FOnTransitionedActions.Add( OnTransitionAction );
+  FOnTransitionedActions.Add( Enforce.ArgumentNotNull<TTransitionAction>( OnTransitionAction, 'OnTransitionAction' ) );
 end;
 
-procedure TStateMachine<TState, TTrigger>.OnUnhandledTriggerAction( UnhandledTriggerAction: TAction<TState, TTrigger> );
+procedure TStateMachine<TState, TTrigger>.OnUnhandledTriggerAction( const UnhandledTriggerAction: TAction<TState, TTrigger> );
 begin
   FUnhandledTriggerAction := Enforce.ArgumentNotNull < TAction < TState, TTrigger >> ( UnhandledTriggerAction, 'UnhandledTriggerAction' );
 end;
@@ -1677,7 +1677,9 @@ end;
 
 { TStateMachine<TState, TTrigger>.TTriggerWithParameters }
 
-constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters.Create( UnderlyingTrigger: TTrigger; ArgumentTypes: TArray<PTypeInfo> );
+constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters.Create(
+  const UnderlyingTrigger: TTrigger;
+  const ArgumentTypes    : TArray<PTypeInfo> );
 begin
   inherited Create;
   FUnderlyingTrigger := UnderlyingTrigger;
@@ -1691,21 +1693,21 @@ end;
 
 { TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0> }
 
-constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0>.Create( UnderlyingTrigger: TTrigger );
+constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0>.Create( const UnderlyingTrigger: TTrigger );
 begin
   inherited Create( UnderlyingTrigger, [ TypeInfo( TArg0 ) ] );
 end;
 
 { TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0, TArg1> }
 
-constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0, TArg1>.Create( UnderlyingTrigger: TTrigger );
+constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0, TArg1>.Create( const UnderlyingTrigger: TTrigger );
 begin
   inherited Create( UnderlyingTrigger, [ TypeInfo( TArg0 ), TypeInfo( TArg1 ) ] );
 end;
 
 { TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0, TArg1, TArg2> }
 
-constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0, TArg1, TArg2>.Create( UnderlyingTrigger: TTrigger );
+constructor TStateMachine<TState, TTrigger>.TTriggerWithParameters<TArg0, TArg1, TArg2>.Create( const UnderlyingTrigger: TTrigger );
 begin
   inherited Create( UnderlyingTrigger, [ TypeInfo( TArg0 ), TypeInfo( TArg1 ), TypeInfo( TArg2 ) ] );
 end;
