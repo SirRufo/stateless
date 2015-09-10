@@ -88,7 +88,7 @@ begin
   TriggerX := sm.SetTriggerParameters<Integer>( FiredTrigger );
   sm.Configure( InitialState )
   {} .PermitDynamic<Integer>( TriggerX,
-    function( a0: Integer ): TState
+    function( const a0: Integer ): TState
     begin
       if a0 = 1
       then

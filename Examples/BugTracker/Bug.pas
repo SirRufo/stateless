@@ -23,8 +23,8 @@ type
     FAssignTrigger: TBugStateMachine.TTriggerWithParameters<string>;
   private { Methods }
     function GetState: TState;
-    procedure SetState( Value: TState );
-    procedure OnAssigned( Assignee: string );
+    procedure SetState( const Value: TState );
+    procedure OnAssigned( const Assignee: string );
     procedure OnDeassigned( );
     procedure OnDeferred( );
     function GetCanAssign: Boolean;
@@ -114,7 +114,7 @@ begin
   Result := FState;
 end;
 
-procedure TBug.OnAssigned( Assignee: string );
+procedure TBug.OnAssigned( const Assignee: string );
 begin
   if not string.IsNullOrEmpty( FAssignee ) and not FAssignee.Equals( Assignee )
   then
@@ -141,7 +141,7 @@ begin
   WriteLn( string.Format( '%s, RE %s: %s ', [ FAssignee, FTitle, AMessage ] ) );
 end;
 
-procedure TBug.SetState( Value: TState );
+procedure TBug.SetState( const Value: TState );
 begin
   FState := Value;
 end;

@@ -29,12 +29,12 @@ begin
   PhoneCall.Configure( State.Connected )
   {} .Permit( Trigger.HungUp, State.OffHook )
   {} .OnEntry(
-    procedure( t: TPhoneCall.TTransition )
+    procedure
     begin
       LCallTimer := TStopwatch.StartNew;
     end )
   {} .OnExit(
-    procedure( t: TPhoneCall.TTransition )
+    procedure
     begin
       LCallTimer.Stop;
       WriteLn( 'Duration: ', LCallTimer.ElapsedMilliseconds, 'ms' );

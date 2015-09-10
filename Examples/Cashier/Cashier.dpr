@@ -25,7 +25,7 @@ type
   private { Methods }
     function GetBalance: Currency;
     function GetState: TState;
-    procedure SetState( Value: TState );
+    procedure SetState( const Value: TState );
   public { Constructors / Destructors }
     constructor Create;
     destructor Destroy; override;
@@ -96,7 +96,7 @@ begin
   FBonState.Configure( TState.PayMode )
   {} .SubstateOf( TState.Opened )
   {} .PermitDynamic<Currency>( FPayTrigger,
-    function( a0: Currency ): TState
+    function( const a0: Currency ): TState
     begin
       if FPaid + a0 >= FTotal
       then
@@ -145,7 +145,7 @@ begin
   FReturned := FPaid - FTotal;
 end;
 
-procedure TBon.SetState( Value: TState );
+procedure TBon.SetState( const Value: TState );
 begin
   FState := Value;
 end;

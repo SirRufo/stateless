@@ -124,7 +124,7 @@ begin
       ActualOrdering := ActualOrdering + [ OnEntry ];
     end );
   sm.OnTransitioned(
-    procedure( t: TTestMachine.TTransition )
+    procedure( const t: TTestMachine.TTransition )
     begin
       ActualOrdering := ActualOrdering + [ OnTransitioned ];
     end );
@@ -226,7 +226,7 @@ begin
 
   sm.Configure( TState.C )
   {} .OnEntryFrom<string, Integer>( X,
-    procedure( Arg0: string; Arg1: Integer )
+    procedure( const Arg0: string; const Arg1: Integer )
     begin
       entryArg0 := Arg0;
       entryArg1 := Arg1;
@@ -298,7 +298,7 @@ begin
     begin
       Result := State;
     end,
-    procedure( s: TState )
+    procedure( const s: TState )
     begin
       State := s;
     end );
@@ -347,7 +347,7 @@ begin
   Assert.AreNotEqual( FiredTrigger, Trigger );
 
   sm.OnUnhandledTriggerAction(
-    procedure( s: TState; t: TTrigger )
+    procedure( const s: TState; const t: TTrigger )
     begin
       State := s;
       Trigger := t;
@@ -372,7 +372,7 @@ begin
   {} .Permit( FiredTrigger, DestinationState );
 
   sm.OnTransitioned(
-    procedure( t: TTestMachine.TTransition )
+    procedure( const t: TTestMachine.TTransition )
     begin
       Transition := t;
     end );

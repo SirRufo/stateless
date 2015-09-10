@@ -26,7 +26,8 @@ uses
   System.Generics.Defaults,
   System.Rtti,
   System.SysUtils,
-  System.TypInfo;
+  System.TypInfo,
+  Stateless.Types;
 
 type
   TValueArguments = TArray<TValue>;
@@ -88,8 +89,8 @@ type
       property IsReentry: Boolean read GetIsReentry;
     end;
 
-    TTransitionAction     = TProc<TTransition>;
-    TTransitionArgsAction = TProc<TTransition, TValueArguments>;
+    TTransitionAction     = TAction<TTransition>;
+    TTransitionArgsAction = TAction<TTransition, TValueArguments>;
 
     /// <summary>
     /// Associates configured parameters with an underlying trigger value.
@@ -170,12 +171,12 @@ type
     TTriggerBehaviour = class abstract
     private
       FTrigger: TTrigger;
-      FGuard  : TFunc<Boolean>;
+      FGuard  : TFunction<Boolean>;
       function GetIsGuardConditionMet: Boolean;
     protected
       constructor Create(
         Trigger: TTrigger;
-        Guard  : TFunc<Boolean> );
+        Guard  : TFunction<Boolean> );
     public
       function ResultsInTransitionFrom(
         Source         : TState;
@@ -235,7 +236,7 @@ type
     public
       constructor Create(
         Trigger: TTrigger;
-        Guard  : TFunc<Boolean> );
+        Guard  : TFunction<Boolean> );
       function ResultsInTransitionFrom(
         Source         : TState;
         Args           : TValueArguments;
@@ -249,7 +250,7 @@ type
       constructor Create(
         const Trigger    : TTrigger;
         const Destination: TState;
-        const Guard      : TFunc<Boolean> );
+        const Guard      : TFunction<Boolean> );
       function ResultsInTransitionFrom(
         Source         : TState;
         Args           : TValueArguments;
@@ -258,12 +259,12 @@ type
 
     TDynamicTriggerBehaviour = class( TTriggerBehaviour )
     private
-      FDestination: TFunc<TValueArguments, TState>;
+      FDestination: TFunction<TValueArguments, TState>;
     public
       constructor Create(
         const Trigger    : TTrigger;
-        const Destination: TFunc<TValueArguments, TState>;
-        const Guard      : TFunc<Boolean> );
+        const Destination: TFunction<TValueArguments, TState>;
+        const Guard      : TFunction<Boolean> );
       function ResultsInTransitionFrom(
         Source         : TState;
         Args           : TValueArguments;
@@ -275,17 +276,17 @@ type
     /// </summary>
     TStateConfiguration = record
     private
-      class var __NoGuard: TFunc<Boolean>;
-      class function GetNoGuard: TFunc<Boolean>; static;
-      class property _NoGuard: TFunc<Boolean> read GetNoGuard;
+      class var __NoGuard: TFunction<Boolean>;
+      class function GetNoGuard: TFunction<Boolean>; static;
+      class property _NoGuard: TFunction<Boolean> read GetNoGuard;
     private
       FStateComparer : IStateComparer;
       FRepresentation: TStateRepresentation;
-      FLookup        : TFunc<TState, TStateRepresentation>;
+      FLookup        : TFunction<TState, TStateRepresentation>;
     private
       constructor Create(
         Representation: TStateRepresentation;
-        Lookup        : TFunc<TState, TStateRepresentation>;
+        Lookup        : TFunction<TState, TStateRepresentation>;
         StateComparer : IStateComparer );
 
       procedure EnforceNotIdentityTransition( const Destination: TState );
@@ -296,14 +297,14 @@ type
       function InternalPermitIf(
         const Trigger         : TTrigger;
         const DestinationState: TState;
-        const Guard           : TFunc<Boolean> ): TStateConfiguration;
+        const Guard           : TFunction<Boolean> ): TStateConfiguration;
       // function InternalPermitDynamic(
       // const Trigger                 : TTrigger;
-      // const DestinationStateSelector: TFunc<TValueArguments, TState> ): TStateConfiguration; inline;
+      // const DestinationStateSelector: TFunction<TValueArguments, TState> ): TStateConfiguration; inline;
       function InternalPermitDynamicIf(
         const Trigger                 : TTrigger;
-        const DestinationStateSelector: TFunc<TValueArguments, TState>;
-        const Guard                   : TFunc<Boolean> ): TStateConfiguration;
+        const DestinationStateSelector: TFunction<TValueArguments, TState>;
+        const Guard                   : TFunction<Boolean> ): TStateConfiguration;
     public
       /// <summary>
       /// Ignore the specified trigger when in the configured state.
@@ -321,14 +322,14 @@ type
       /// <returns>The receiver.</returns>
       function IgnoreIf(
         const Trigger: TTrigger;
-        const Guard  : TFunc<Boolean> ): TStateConfiguration;
+        const Guard  : TFunction<Boolean> ): TStateConfiguration;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
       /// </summary>
       /// <param name="entryAction">Action to execute.</param>
       /// <returns>The receiver.</returns>
-      function OnEntry( const EntryAction: TProc ): TStateConfiguration; overload;
+      function OnEntry( const EntryAction: TAction ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
@@ -345,7 +346,7 @@ type
       /// <returns>The receiver.</returns>
       function OnEntryFrom(
         const Trigger    : TTrigger;
-        const EntryAction: TProc ): TStateConfiguration; overload;
+        const EntryAction: TAction ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
@@ -366,7 +367,7 @@ type
       /// <returns>The receiver.</returns>
       function OnEntryFrom<TArg0>(
         const Trigger    : TTriggerWithParameters<TArg0>;
-        const EntryAction: TProc<TArg0> ): TStateConfiguration; overload;
+        const EntryAction: TAction<TArg0> ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
@@ -377,7 +378,7 @@ type
       /// <returns>The receiver.</returns>
       function OnEntryFrom<TArg0>(
         const Trigger    : TTriggerWithParameters<TArg0>;
-        const EntryAction: TProc<TArg0, TTransition> ): TStateConfiguration; overload;
+        const EntryAction: TAction<TArg0, TTransition> ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
@@ -389,7 +390,7 @@ type
       /// <returns>The receiver.</returns>
       function OnEntryFrom<TArg0, TArg1>(
         const Trigger    : TTriggerWithParameters<TArg0, TArg1>;
-        const EntryAction: TProc<TArg0, TArg1> ): TStateConfiguration; overload;
+        const EntryAction: TAction<TArg0, TArg1> ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
@@ -401,7 +402,7 @@ type
       /// <returns>The receiver.</returns>
       function OnEntryFrom<TArg0, TArg1>(
         const Trigger    : TTriggerWithParameters<TArg0, TArg1>;
-        const EntryAction: TProc<TArg0, TArg1, TTransition> ): TStateConfiguration; overload;
+        const EntryAction: TAction<TArg0, TArg1, TTransition> ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
@@ -414,7 +415,7 @@ type
       /// <returns>The receiver.</returns>
       function OnEntryFrom<TArg0, TArg1, TArg2>(
         const Trigger    : TTriggerWithParameters<TArg0, TArg1, TArg2>;
-        const EntryAction: TProc<TArg0, TArg1, TArg2> ): TStateConfiguration; overload;
+        const EntryAction: TAction<TArg0, TArg1, TArg2> ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning into
       /// the configured state.
@@ -427,14 +428,14 @@ type
       /// <returns>The receiver.</returns>
       function OnEntryFrom<TArg0, TArg1, TArg2>(
         const Trigger    : TTriggerWithParameters<TArg0, TArg1, TArg2>;
-        const EntryAction: TProc<TArg0, TArg1, TArg2, TTransition> ): TStateConfiguration; overload;
+        const EntryAction: TAction<TArg0, TArg1, TArg2, TTransition> ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning from
       /// the configured state.
       /// </summary>
       /// <param name="exitAction">Action to execute.</param>
       /// <returns>The receiver.</returns>
-      function OnExit( const ExitAction: TProc ): TStateConfiguration; overload;
+      function OnExit( const ExitAction: TAction ): TStateConfiguration; overload;
       /// <summary>
       /// Specify an action that will execute when transitioning from
       /// the configured state.
@@ -465,7 +466,7 @@ type
       function PermitIf(
         const Trigger         : TTrigger;
         const DestinationState: TState;
-        const Guard           : TFunc<Boolean> ): TStateConfiguration;
+        const Guard           : TFunction<Boolean> ): TStateConfiguration;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -476,7 +477,7 @@ type
       /// <returns>The reciever.</returns>
       function PermitDynamic(
         const Trigger                 : TTrigger;
-        const DestinationStateSelector: TFunc<TState> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TState> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -488,7 +489,7 @@ type
       /// <typeparam name="TArg0">Type of the first trigger argument.</typeparam>
       function PermitDynamic<TArg0>(
         const Trigger                 : TTriggerWithParameters<TArg0>;
-        const DestinationStateSelector: TFunc<TArg0, TState> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TArg0, TState> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -501,7 +502,7 @@ type
       /// <typeparam name="TArg1">Type of the second trigger argument.</typeparam>
       function PermitDynamic<TArg0, TArg1>(
         const Trigger                 : TTriggerWithParameters<TArg0, TArg1>;
-        const DestinationStateSelector: TFunc<TArg0, TArg1, TState> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TArg0, TArg1, TState> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -515,7 +516,7 @@ type
       /// <typeparam name="TArg2">Type of the third trigger argument.</typeparam>
       function PermitDynamic<TArg0, TArg1, TArg2>(
         const Trigger                 : TTriggerWithParameters<TArg0, TArg1, TArg2>;
-        const DestinationStateSelector: TFunc<TArg0, TArg1, TArg2, TState> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TArg0, TArg1, TArg2, TState> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -528,8 +529,8 @@ type
       /// <returns>The reciever.</returns>
       function PermitDynamicIf(
         const Trigger                 : TTrigger;
-        const DestinationStateSelector: TFunc<TState>;
-        const Guard                   : TFunc<Boolean> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TState>;
+        const Guard                   : TFunction<Boolean> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -543,8 +544,8 @@ type
       /// <typeparam name="TArg0">Type of the first trigger argument.</typeparam>
       function PermitDynamicIf<TArg0>(
         const Trigger                 : TTriggerWithParameters<TArg0>;
-        const DestinationStateSelector: TFunc<TArg0, TState>;
-        const Guard                   : TFunc<Boolean> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TArg0, TState>;
+        const Guard                   : TFunction<Boolean> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -559,8 +560,8 @@ type
       /// <typeparam name="TArg1">Type of the second trigger argument.</typeparam>
       function PermitDynamicIf<TArg0, TArg1>(
         const Trigger                 : TTriggerWithParameters<TArg0, TArg1>;
-        const DestinationStateSelector: TFunc<TArg0, TArg1, TState>;
-        const Guard                   : TFunc<Boolean> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TArg0, TArg1, TState>;
+        const Guard                   : TFunction<Boolean> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger and transition to the destination state, calculated
       /// dynamically by the supplied function.
@@ -576,8 +577,8 @@ type
       /// <typeparam name="TArg2">Type of the third trigger argument.</typeparam>
       function PermitDynamicIf<TArg0, TArg1, TArg2>(
         const Trigger                 : TTriggerWithParameters<TArg0, TArg1, TArg2>;
-        const DestinationStateSelector: TFunc<TArg0, TArg1, TArg2, TState>;
-        const Guard                   : TFunc<Boolean> ): TStateConfiguration; overload;
+        const DestinationStateSelector: TFunction<TArg0, TArg1, TArg2, TState>;
+        const Guard                   : TFunction<Boolean> ): TStateConfiguration; overload;
       /// <summary>
       /// Accept the specified trigger, execute exit actions and re-execute entry actions.
       /// Reentry behaves as though the configured state transitions to an identical sibling state.
@@ -603,7 +604,7 @@ type
       /// </remarks>
       function PermitReentryIf(
         const Trigger: TTrigger;
-        const Guard  : TFunc<Boolean> ): TStateConfiguration;
+        const Guard  : TFunction<Boolean> ): TStateConfiguration;
       /// <summary>
       /// Sets the superstate that the configured state is a substate of.
       /// </summary>
@@ -622,11 +623,11 @@ type
   private
     FStateComparer         : IStateComparer;
     FTriggerComparer       : ITriggerComparer;
-    FStateAccessor         : TFunc<TState>;
-    FStateMutuator         : TProc<TState>;
+    FStateAccessor         : TFunction<TState>;
+    FStateMutuator         : TAction<TState>;
     FStateConfiguration    : TObjectDictionary<TState, TStateRepresentation>;
     FTriggerConfiguration  : TObjectDictionary<TTrigger, TTriggerWithParameters>;
-    FUnhandledTriggerAction: TProc<TState, TTrigger>;
+    FUnhandledTriggerAction: TAction<TState, TTrigger>;
     FOnTransitionedActions : TList<TTransitionAction>;
     function GetState: TState;
     procedure InternalFire(
@@ -634,12 +635,12 @@ type
       const Args   : TValueArguments );
     procedure SetState( const Value: TState );
     function GetCurrentRepresentation: TStateRepresentation;
-    function GetRepresentation( State: TState ): TStateRepresentation; // do not const the argument!
+    function GetRepresentation( const State: TState ): TStateRepresentation;
     function GetPermittedTriggers: TArray<TTrigger>;
     procedure SaveTriggerConfiguration( Trigger: TTriggerWithParameters );
     class procedure DefaultUnhandledTriggerAction(
-      State  : TState;
-      Trigger: TTrigger ); // do not const the arguments!
+      const State  : TState;
+      const Trigger: TTrigger ); // do not const the arguments!
   protected
     property CurrentRepresentation: TStateRepresentation read GetCurrentRepresentation;
   public { Constructors / Destructors }
@@ -657,8 +658,8 @@ type
     /// <param name="stateAccessor">A function that will be called to read the current state value.</param>
     /// <param name="stateMutator">An action that will be called to write new state values.</param>
     constructor Create(
-      StateAccessor        : TFunc<TState>;
-      StateMutuator        : TProc<TState>;
+      StateAccessor        : TFunction<TState>;
+      StateMutuator        : TAction<TState>;
       const StateComparer  : IStateComparer = nil;
       const TriggerComparer: ITriggerComparer = nil ); overload;
     destructor Destroy; override;
@@ -758,7 +759,7 @@ type
     /// is fired.
     /// </summary>
     /// <param name="unhandledTriggerAction">An action to call when an unhandled trigger is fired.</param>
-    procedure OnUnhandledTriggerAction( UnhandledTriggerAction: TProc<TState, TTrigger> );
+    procedure OnUnhandledTriggerAction( UnhandledTriggerAction: TAction<TState, TTrigger> );
     /// <summary>
     /// Specify the arguments that must be supplied when a specific trigger is fired.
     /// </summary>
@@ -833,7 +834,7 @@ begin
     begin
       Result := LState;
     end,
-    procedure( Value: TState )
+    procedure( const Value: TState )
     begin
       LState := Value;
     end,
@@ -855,8 +856,8 @@ begin
 end;
 
 constructor TStateMachine<TState, TTrigger>.Create(
-  StateAccessor        : TFunc<TState>;
-  StateMutuator        : TProc<TState>;
+  StateAccessor        : TFunction<TState>;
+  StateMutuator        : TAction<TState>;
   const StateComparer  : IStateComparer;
   const TriggerComparer: ITriggerComparer );
 begin
@@ -889,8 +890,8 @@ begin
 end;
 
 class procedure TStateMachine<TState, TTrigger>.DefaultUnhandledTriggerAction(
-  State  : TState;
-  Trigger: TTrigger );
+  const State  : TState;
+  const Trigger: TTrigger );
 begin
   raise EInvalidOpException.Create( NoTransitionsPermitted );
 end;
@@ -913,7 +914,7 @@ begin
   Result := CurrentRepresentation.PermittedTriggers;
 end;
 
-function TStateMachine<TState, TTrigger>.GetRepresentation( State: TState ): TStateRepresentation;
+function TStateMachine<TState, TTrigger>.GetRepresentation( const State: TState ): TStateRepresentation;
 begin
   if not FStateConfiguration.TryGetValue( State, Result )
   then
@@ -941,9 +942,9 @@ begin
   FOnTransitionedActions.Add( OnTransitionAction );
 end;
 
-procedure TStateMachine<TState, TTrigger>.OnUnhandledTriggerAction( UnhandledTriggerAction: TProc<TState, TTrigger> );
+procedure TStateMachine<TState, TTrigger>.OnUnhandledTriggerAction( UnhandledTriggerAction: TAction<TState, TTrigger> );
 begin
-  FUnhandledTriggerAction := Enforce.ArgumentNotNull < TProc < TState, TTrigger >> ( UnhandledTriggerAction, 'UnhandledTriggerAction' );
+  FUnhandledTriggerAction := Enforce.ArgumentNotNull < TAction < TState, TTrigger >> ( UnhandledTriggerAction, 'UnhandledTriggerAction' );
 end;
 
 procedure TStateMachine<TState, TTrigger>.SaveTriggerConfiguration( Trigger: TTriggerWithParameters );
@@ -1027,7 +1028,7 @@ procedure TStateMachine<TState, TTrigger>.TStateRepresentation.AddEntryAction(
 begin
   Enforce.ArgumentNotNull<TTransitionArgsAction>( Action, 'Action' );
   AddEntryAction(
-    procedure( T: TTransition; a: TValueArguments )
+    procedure( const T: TTransition; const a: TValueArguments )
     begin
       if FTriggerComparer.Equals( T.Trigger, Trigger )
       then
@@ -1235,11 +1236,11 @@ end;
 
 constructor TStateMachine<TState, TTrigger>.TStateConfiguration.Create(
   Representation: TStateRepresentation;
-  Lookup        : TFunc<TState, TStateRepresentation>;
+  Lookup        : TFunction<TState, TStateRepresentation>;
   StateComparer : IStateComparer );
 begin
   FRepresentation := Enforce.ArgumentNotNull( Representation, 'Representation' );
-  FLookup         := Enforce.ArgumentNotNull < TFunc < TState, TStateRepresentation >> ( Lookup, 'Lookup' );
+  FLookup         := Enforce.ArgumentNotNull < TFunction < TState, TStateRepresentation >> ( Lookup, 'Lookup' );
   FStateComparer  := StateComparer;
 end;
 
@@ -1279,7 +1280,7 @@ begin
   Result := IgnoreIf( Trigger, _NoGuard );
 end;
 
-function TStateMachine<TState, TTrigger>.TStateConfiguration.IgnoreIf( const Trigger: TTrigger; const Guard: TFunc<Boolean> ): TStateConfiguration;
+function TStateMachine<TState, TTrigger>.TStateConfiguration.IgnoreIf( const Trigger: TTrigger; const Guard: TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := Self;
   FRepresentation.AddTriggerBehaviour( TIgnoredTriggerBehaviour.Create( Trigger, Guard ) );
@@ -1295,15 +1296,15 @@ end;
 
 // function TStateMachine<TState, TTrigger>.TStateConfiguration.InternalPermitDynamic(
 // const Trigger                 : TTrigger;
-// const DestinationStateSelector: TFunc<TValueArguments, TState> ): TStateConfiguration;
+// const DestinationStateSelector: TFunction<TValueArguments, TState> ): TStateConfiguration;
 // begin
 // Result := InternalPermitDynamicIf( Trigger, DestinationStateSelector, _NoGuard );
 // end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.InternalPermitDynamicIf(
   const Trigger                 : TTrigger;
-  const DestinationStateSelector: TFunc<TValueArguments, TState>;
-  const Guard                   : TFunc<Boolean> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TValueArguments, TState>;
+  const Guard                   : TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := Self;
   FRepresentation.AddTriggerBehaviour( TDynamicTriggerBehaviour.Create( Trigger, DestinationStateSelector, Guard ) );
@@ -1312,7 +1313,7 @@ end;
 function TStateMachine<TState, TTrigger>.TStateConfiguration.InternalPermitIf(
   const Trigger         : TTrigger;
   const DestinationState: TState;
-  const Guard           : TFunc<Boolean> ): TStateConfiguration;
+  const Guard           : TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := Self;
   FRepresentation.AddTriggerBehaviour( TTransitioningTriggerBehaviour.Create( Trigger, DestinationState, Guard ) );
@@ -1367,16 +1368,16 @@ function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntry( const Entr
 begin
   Result := Self;
   FRepresentation.AddEntryAction(
-    procedure( T: TTransition; a: TValueArguments )
+    procedure( const T: TTransition; const a: TValueArguments )
     begin
       EntryAction( T );
     end );
 end;
 
-function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntry( const EntryAction: TProc ): TStateConfiguration;
+function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntry( const EntryAction: TAction ): TStateConfiguration;
 begin
   Result := OnEntry(
-    procedure( T: TTransition )
+    procedure( const T: TTransition )
     begin
       EntryAction( );
     end );
@@ -1384,10 +1385,10 @@ end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom(
   const Trigger    : TTrigger;
-  const EntryAction: TProc ): TStateConfiguration;
+  const EntryAction: TAction ): TStateConfiguration;
 begin
   Result := OnEntryFrom( Trigger,
-    procedure( T: TTransition )
+    procedure( const T: TTransition )
     begin
       EntryAction( );
     end );
@@ -1399,17 +1400,17 @@ function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom(
 begin
   Result := Self;
   FRepresentation.AddEntryAction( Trigger,
-    procedure( T: TTransition; a: TValueArguments )
+    procedure( const T: TTransition; const a: TValueArguments )
     begin
       EntryAction( T );
     end );
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom<TArg0, TArg1, TArg2>( const Trigger: TTriggerWithParameters<TArg0, TArg1, TArg2>;
-  const EntryAction: TProc<TArg0, TArg1, TArg2> ): TStateConfiguration;
+  const EntryAction: TAction<TArg0, TArg1, TArg2> ): TStateConfiguration;
 begin
   Result := OnEntryFrom<TArg0, TArg1, TArg2>( Trigger,
-    procedure( a0: TArg0; a1: TArg1; a2: TArg2; T: TTransition )
+    procedure( const a0: TArg0; const a1: TArg1; const a2: TArg2; const T: TTransition )
     begin
       EntryAction(
         a0,
@@ -1419,11 +1420,11 @@ begin
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom<TArg0, TArg1, TArg2>( const Trigger: TTriggerWithParameters<TArg0, TArg1, TArg2>;
-  const EntryAction: TProc<TArg0, TArg1, TArg2, TTransition> ): TStateConfiguration;
+  const EntryAction: TAction<TArg0, TArg1, TArg2, TTransition> ): TStateConfiguration;
 begin
   Result := Self;
   FRepresentation.AddEntryAction( Trigger.Trigger,
-    procedure( T: TTransition; a: TValueArguments )
+    procedure( const T: TTransition; const a: TValueArguments )
     begin
       EntryAction(
         TParameterConversion.Unpack<TArg0>( a, 0 ),
@@ -1434,11 +1435,11 @@ begin
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom<TArg0, TArg1>( const Trigger: TTriggerWithParameters<TArg0, TArg1>;
-  const EntryAction: TProc<TArg0, TArg1, TTransition> ): TStateConfiguration;
+  const EntryAction: TAction<TArg0, TArg1, TTransition> ): TStateConfiguration;
 begin
   Result := Self;
   FRepresentation.AddEntryAction( Trigger.Trigger,
-    procedure( T: TTransition; a: TValueArguments )
+    procedure( const T: TTransition; const a: TValueArguments )
     begin
       EntryAction(
         TParameterConversion.Unpack<TArg0>( a, 0 ),
@@ -1449,10 +1450,10 @@ end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom<TArg0, TArg1>(
   const Trigger    : TTriggerWithParameters<TArg0, TArg1>;
-  const EntryAction: TProc<TArg0, TArg1> ): TStateConfiguration;
+  const EntryAction: TAction<TArg0, TArg1> ): TStateConfiguration;
 begin
   Result := OnEntryFrom<TArg0, TArg1>( Trigger,
-    procedure( a0: TArg0; a1: TArg1; T: TTransition )
+    procedure( const a0: TArg0; const a1: TArg1; const T: TTransition )
     begin
       EntryAction(
         a0,
@@ -1462,11 +1463,11 @@ end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom<TArg0>(
   const Trigger    : TTriggerWithParameters<TArg0>;
-  const EntryAction: TProc<TArg0, TTransition> ): TStateConfiguration;
+  const EntryAction: TAction<TArg0, TTransition> ): TStateConfiguration;
 begin
   Result := Self;
   FRepresentation.AddEntryAction( Trigger.Trigger,
-    procedure( T: TTransition; a: TValueArguments )
+    procedure( const T: TTransition; const a: TValueArguments )
     begin
       EntryAction(
         TParameterConversion.Unpack<TArg0>( a, 0 ),
@@ -1476,10 +1477,10 @@ end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.OnEntryFrom<TArg0>(
   const Trigger    : TTriggerWithParameters<TArg0>;
-  const EntryAction: TProc<TArg0> ): TStateConfiguration;
+  const EntryAction: TAction<TArg0> ): TStateConfiguration;
 begin
   Result := OnEntryFrom<TArg0>( Trigger,
-    procedure( a0: TArg0; T: TTransition )
+    procedure( const a0: TArg0; const T: TTransition )
     begin
       EntryAction( a0 );
     end );
@@ -1503,7 +1504,7 @@ end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamic(
   const Trigger                 : TTrigger;
-  const DestinationStateSelector: TFunc<TState> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TState> ): TStateConfiguration;
 begin
   Result := PermitDynamicIf(
     Trigger,
@@ -1513,7 +1514,7 @@ end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamic<TArg0, TArg1, TArg2>(
   const Trigger                 : TTriggerWithParameters<TArg0, TArg1, TArg2>;
-  const DestinationStateSelector: TFunc<TArg0, TArg1, TArg2, TState> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TArg0, TArg1, TArg2, TState> ): TStateConfiguration;
 begin
   Result := PermitDynamicIf<TArg0, TArg1, TArg2>(
     Trigger,
@@ -1523,11 +1524,11 @@ end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamicIf<TArg0, TArg1, TArg2>(
   const Trigger                 : TTriggerWithParameters<TArg0, TArg1, TArg2>;
-  const DestinationStateSelector: TFunc<TArg0, TArg1, TArg2, TState>;
-  const Guard                   : TFunc<Boolean> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TArg0, TArg1, TArg2, TState>;
+  const Guard                   : TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := InternalPermitDynamicIf( Trigger.Trigger,
-    function( a: TValueArguments ): TState
+    function( const a: TValueArguments ): TState
     begin
       Result := DestinationStateSelector(
         TParameterConversion.Unpack<TArg0>( a, 0 ),
@@ -1537,10 +1538,10 @@ begin
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamicIf<TArg0, TArg1>( const Trigger: TTriggerWithParameters<TArg0, TArg1>;
-  const DestinationStateSelector: TFunc<TArg0, TArg1, TState>; const Guard: TFunc<Boolean> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TArg0, TArg1, TState>; const Guard: TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := InternalPermitDynamicIf( Trigger.Trigger,
-    function( a: TValueArguments ): TState
+    function( const a: TValueArguments ): TState
     begin
       Result := DestinationStateSelector(
         TParameterConversion.Unpack<TArg0>( a, 0 ),
@@ -1549,39 +1550,39 @@ begin
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamic<TArg0, TArg1>( const Trigger: TTriggerWithParameters<TArg0, TArg1>;
-  const DestinationStateSelector: TFunc<TArg0, TArg1, TState> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TArg0, TArg1, TState> ): TStateConfiguration;
 begin
   Result := PermitDynamicIf<TArg0, TArg1>( Trigger, DestinationStateSelector, _NoGuard );
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamic<TArg0>( const Trigger: TTriggerWithParameters<TArg0>;
-  const DestinationStateSelector: TFunc<TArg0, TState> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TArg0, TState> ): TStateConfiguration;
 begin
   Result := PermitDynamicIf<TArg0>( Trigger, DestinationStateSelector, _NoGuard );
 end;
 
-function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamicIf( const Trigger: TTrigger; const DestinationStateSelector: TFunc<TState>;
-  const Guard: TFunc<Boolean> ): TStateConfiguration;
+function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamicIf( const Trigger: TTrigger; const DestinationStateSelector: TFunction<TState>;
+  const Guard: TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := InternalPermitDynamicIf( Trigger,
-    function( a: TValueArguments ): TState
+    function( const a: TValueArguments ): TState
     begin
       Result := DestinationStateSelector( );
     end, Guard );
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitDynamicIf<TArg0>( const Trigger: TTriggerWithParameters<TArg0>;
-  const DestinationStateSelector: TFunc<TArg0, TState>; const Guard: TFunc<Boolean> ): TStateConfiguration;
+  const DestinationStateSelector: TFunction<TArg0, TState>; const Guard: TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := InternalPermitDynamicIf( Trigger.Trigger,
-    function( a: TValueArguments ): TState
+    function( const a: TValueArguments ): TState
     begin
       Result := DestinationStateSelector( TParameterConversion.Unpack<TArg0>( a, 0 ) );
     end, Guard );
 end;
 
 function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitIf( const Trigger: TTrigger; const DestinationState: TState;
-  const Guard: TFunc<Boolean> ): TStateConfiguration;
+  const Guard: TFunction<Boolean> ): TStateConfiguration;
 begin
   EnforceNotIdentityTransition( DestinationState );
   Result := InternalPermitIf( Trigger, DestinationState, Guard );
@@ -1592,7 +1593,7 @@ begin
   Result := InternalPermit( Trigger, FRepresentation.UnderlyingState );
 end;
 
-function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitReentryIf( const Trigger: TTrigger; const Guard: TFunc<Boolean> ): TStateConfiguration;
+function TStateMachine<TState, TTrigger>.TStateConfiguration.PermitReentryIf( const Trigger: TTrigger; const Guard: TFunction<Boolean> ): TStateConfiguration;
 begin
   Result := InternalPermitIf( Trigger, FRepresentation.UnderlyingState, Guard );
 end;
@@ -1607,7 +1608,7 @@ begin
   SuperRepresentation.AddSubstate( FRepresentation );
 end;
 
-class function TStateMachine<TState, TTrigger>.TStateConfiguration.GetNoGuard: TFunc<Boolean>;
+class function TStateMachine<TState, TTrigger>.TStateConfiguration.GetNoGuard: TFunction<Boolean>;
 begin
   if not Assigned( __NoGuard )
   then
@@ -1619,10 +1620,10 @@ begin
   Result := __NoGuard;
 end;
 
-function TStateMachine<TState, TTrigger>.TStateConfiguration.OnExit( const ExitAction: TProc ): TStateConfiguration;
+function TStateMachine<TState, TTrigger>.TStateConfiguration.OnExit( const ExitAction: TAction ): TStateConfiguration;
 begin
   Result := OnExit(
-    procedure( T: TTransition )
+    procedure( const T: TTransition )
     begin
       ExitAction( );
     end );
@@ -1648,11 +1649,11 @@ end;
 
 { TStateMachine<TState, TTrigger>.TTriggerBehaviour }
 
-constructor TStateMachine<TState, TTrigger>.TTriggerBehaviour.Create( Trigger: TTrigger; Guard: TFunc<Boolean> );
+constructor TStateMachine<TState, TTrigger>.TTriggerBehaviour.Create( Trigger: TTrigger; Guard: TFunction<Boolean> );
 begin
   inherited Create;
   FTrigger := Trigger;
-  FGuard   := Enforce.ArgumentNotNull < TFunc < Boolean >> ( Guard, 'Guard' );
+  FGuard   := Enforce.ArgumentNotNull < TFunction < Boolean >> ( Guard, 'Guard' );
 end;
 
 function TStateMachine<TState, TTrigger>.TTriggerBehaviour.GetIsGuardConditionMet: Boolean;
@@ -1662,7 +1663,7 @@ end;
 
 { TStateMachine<TState, TTrigger>.TIgnoredTriggerBehaviour }
 
-constructor TStateMachine<TState, TTrigger>.TIgnoredTriggerBehaviour.Create( Trigger: TTrigger; Guard: TFunc<Boolean> );
+constructor TStateMachine<TState, TTrigger>.TIgnoredTriggerBehaviour.Create( Trigger: TTrigger; Guard: TFunction<Boolean> );
 begin
   inherited;
 end;
@@ -1712,7 +1713,7 @@ end;
 { TStateMachine<TState, TTrigger>.TTransitioningTriggerBehaviour }
 
 constructor TStateMachine<TState, TTrigger>.TTransitioningTriggerBehaviour.Create( const Trigger: TTrigger; const Destination: TState;
-  const Guard: TFunc<Boolean> );
+  const Guard: TFunction<Boolean> );
 begin
   inherited Create( Trigger, Guard );
   FDestination := Destination;
@@ -1727,8 +1728,8 @@ end;
 
 { TStateMachine<TState, TTrigger>.TDynamicTriggerBehaviour }
 
-constructor TStateMachine<TState, TTrigger>.TDynamicTriggerBehaviour.Create( const Trigger: TTrigger; const Destination: TFunc<TValueArguments, TState>;
-  const Guard: TFunc<Boolean> );
+constructor TStateMachine<TState, TTrigger>.TDynamicTriggerBehaviour.Create( const Trigger: TTrigger; const Destination: TFunction<TValueArguments, TState>;
+  const Guard: TFunction<Boolean> );
 begin
   inherited Create( Trigger, Guard );
   FDestination := Destination;

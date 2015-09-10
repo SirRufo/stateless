@@ -134,12 +134,12 @@ var
 begin
   stateRepresentation := CreateRepresentation( TState.B );
   stateRepresentation.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       actual := actual + [ 0 ];
     end );
   stateRepresentation.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       actual := actual + [ 1 ];
     end );
@@ -155,12 +155,12 @@ var
 begin
   stateRepresentation := CreateRepresentation( TState.B );
   stateRepresentation.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       actual := actual + [ 0 ];
     end );
   stateRepresentation.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       actual := actual + [ 1 ];
     end );
@@ -239,7 +239,7 @@ begin
   stateRepresentation := CreateRepresentation( TState.B );
   Transition          := TTransition.Create( TState.A, TState.B, TTrigger.X, stateComparer );
   stateRepresentation.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       actualTransition := t;
     end );
@@ -256,7 +256,7 @@ begin
   stateRepresentation := CreateRepresentation( TState.B );
   Transition          := TTransition.Create( TState.A, TState.B, TTrigger.X, stateComparer );
   stateRepresentation.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       actualTransition := t;
     end );
@@ -272,7 +272,7 @@ begin
   stateRepresentation := CreateRepresentation( TState.A );
   Transition          := TTransition.Create( TState.A, TState.B, TTrigger.X, stateComparer );
   stateRepresentation.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       actualTransition := t;
     end );
@@ -289,7 +289,7 @@ begin
   CreateSuperSubstatePair( super, sub );
   Executed := False;
   super.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       Executed := True;
     end );
@@ -308,13 +308,13 @@ begin
   subOrder   := 0;
   superOrder := 0;
   super.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       Inc( order );
       superOrder := order;
     end );
   sub.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       Inc( order );
       subOrder := order;
@@ -332,7 +332,7 @@ begin
   CreateSuperSubstatePair( super, sub );
   Executed := False;
   super.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       Executed := True;
     end );
@@ -349,7 +349,7 @@ begin
   CreateSuperSubstatePair( super, sub );
   Executed := False;
   super.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       Executed := True;
     end );
@@ -368,13 +368,13 @@ begin
   subOrder   := 0;
   superOrder := 0;
   super.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       Inc( order );
       superOrder := order;
     end );
   sub.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       Inc( order );
       subOrder := order;
@@ -392,7 +392,7 @@ begin
   CreateSuperSubstatePair( super, sub );
   Executed := False;
   super.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       Executed := True;
     end );
@@ -437,7 +437,7 @@ begin
   CreateSuperSubstatePair( super, sub );
   Executed := False;
   sub.AddEntryAction(
-    procedure( t: TTransition; A: TValueArguments )
+    procedure( const t: TTransition; const A: TValueArguments )
     begin
       Executed := True;
     end );
@@ -454,7 +454,7 @@ begin
   CreateSuperSubstatePair( super, sub );
   Executed := False;
   sub.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       Executed := True;
     end );
@@ -471,7 +471,7 @@ begin
   stateRepresentation := CreateRepresentation( TState.A );
   Transition          := TTransition.Create( TState.A, TState.B, TTrigger.X, stateComparer );
   stateRepresentation.AddExitAction(
-    procedure( t: TTransition )
+    procedure( const t: TTransition )
     begin
       actualTransition := t;
     end );
