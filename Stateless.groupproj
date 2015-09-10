@@ -1,0 +1,84 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{5A033992-31BE-4502-AB24-CAC3D259F0E3}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Stateless.Tests\Stateless.Tests.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Examples\Adventure\Adventure.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Examples\BugTracker\BugTracker.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Examples\Cashier\Cashier.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Examples\PhoneCall\PhoneCall.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Stateless_Tests">
+        <MSBuild Projects="Stateless.Tests\Stateless.Tests.dproj"/>
+    </Target>
+    <Target Name="Stateless_Tests:Clean">
+        <MSBuild Projects="Stateless.Tests\Stateless.Tests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Stateless_Tests:Make">
+        <MSBuild Projects="Stateless.Tests\Stateless.Tests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Adventure">
+        <MSBuild Projects="Examples\Adventure\Adventure.dproj"/>
+    </Target>
+    <Target Name="Adventure:Clean">
+        <MSBuild Projects="Examples\Adventure\Adventure.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Adventure:Make">
+        <MSBuild Projects="Examples\Adventure\Adventure.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="BugTracker">
+        <MSBuild Projects="Examples\BugTracker\BugTracker.dproj"/>
+    </Target>
+    <Target Name="BugTracker:Clean">
+        <MSBuild Projects="Examples\BugTracker\BugTracker.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BugTracker:Make">
+        <MSBuild Projects="Examples\BugTracker\BugTracker.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Cashier">
+        <MSBuild Projects="Examples\Cashier\Cashier.dproj"/>
+    </Target>
+    <Target Name="Cashier:Clean">
+        <MSBuild Projects="Examples\Cashier\Cashier.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Cashier:Make">
+        <MSBuild Projects="Examples\Cashier\Cashier.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="PhoneCall">
+        <MSBuild Projects="Examples\PhoneCall\PhoneCall.dproj"/>
+    </Target>
+    <Target Name="PhoneCall:Clean">
+        <MSBuild Projects="Examples\PhoneCall\PhoneCall.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="PhoneCall:Make">
+        <MSBuild Projects="Examples\PhoneCall\PhoneCall.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Stateless_Tests;Adventure;BugTracker;Cashier;PhoneCall"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Stateless_Tests:Clean;Adventure:Clean;BugTracker:Clean;Cashier:Clean;PhoneCall:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Stateless_Tests:Make;Adventure:Make;BugTracker:Make;Cashier:Make;PhoneCall:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
