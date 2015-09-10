@@ -18,6 +18,9 @@
         <Projects Include="Examples\PhoneCall\PhoneCall.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="Examples\TrafficLight\TrafficLight.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -71,14 +74,23 @@
     <Target Name="PhoneCall:Make">
         <MSBuild Projects="Examples\PhoneCall\PhoneCall.dproj" Targets="Make"/>
     </Target>
+    <Target Name="TrafficLight">
+        <MSBuild Projects="Examples\TrafficLight\TrafficLight.dproj"/>
+    </Target>
+    <Target Name="TrafficLight:Clean">
+        <MSBuild Projects="Examples\TrafficLight\TrafficLight.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TrafficLight:Make">
+        <MSBuild Projects="Examples\TrafficLight\TrafficLight.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Stateless_Tests;Adventure;BugTracker;Cashier;PhoneCall"/>
+        <CallTarget Targets="Stateless_Tests;Adventure;BugTracker;Cashier;PhoneCall;TrafficLight"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Stateless_Tests:Clean;Adventure:Clean;BugTracker:Clean;Cashier:Clean;PhoneCall:Clean"/>
+        <CallTarget Targets="Stateless_Tests:Clean;Adventure:Clean;BugTracker:Clean;Cashier:Clean;PhoneCall:Clean;TrafficLight:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Stateless_Tests:Make;Adventure:Make;BugTracker:Make;Cashier:Make;PhoneCall:Make"/>
+        <CallTarget Targets="Stateless_Tests:Make;Adventure:Make;BugTracker:Make;Cashier:Make;PhoneCall:Make;TrafficLight:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
