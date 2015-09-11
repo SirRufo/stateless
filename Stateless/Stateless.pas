@@ -271,6 +271,8 @@ type
         out Destination: TState ): Boolean; override;
     end;
   public type
+    TMethodFunction<T, TResult> = function( const Arg: T ): TResult of object;
+
     /// <summary>
     /// The configuration for a single state value.
     /// </summary>
@@ -282,11 +284,11 @@ type
     private
       FStateComparer : IStateComparer;
       FRepresentation: TStateRepresentation;
-      FLookup        : TFunction<TState, TStateRepresentation>;
+      FLookup        : TMethodFunction<TState, TStateRepresentation>;
     private
       constructor Create(
         Representation: TStateRepresentation;
-        Lookup        : TFunction<TState, TStateRepresentation>;
+        Lookup        : TMethodFunction<TState, TStateRepresentation>;
         StateComparer : IStateComparer );
 
       procedure EnforceNotIdentityTransition( const Destination: TState );
@@ -1236,12 +1238,15 @@ end;
 
 constructor TStateMachine<TState, TTrigger>.TStateConfiguration.Create(
   Representation: TStateRepresentation;
-  Lookup        : TFunction<TState, TStateRepresentation>;
+  Lookup        : TMethodFunction<TState, TStateRepresentation>;
   StateComparer : IStateComparer );
 begin
   FRepresentation := Enforce.ArgumentNotNull( Representation, 'Representation' );
-  FLookup         := Enforce.ArgumentNotNull < TFunction < TState, TStateRepresentation >> ( Lookup, 'Lookup' );
-  FStateComparer  := StateComparer;
+  if not Assigned( Lookup )
+  then
+    raise EArgumentNilException.Create( 'Lookup' );
+  FLookup        := Lookup;
+  FStateComparer := StateComparer;
 end;
 
 procedure TStateMachine<TState, TTrigger>.TStateConfiguration.EnforceNotIdentityTransition( const Destination: TState );
