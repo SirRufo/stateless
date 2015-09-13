@@ -1,5 +1,5 @@
 {************************************************************************
- Copyright 2015 Oliver Münzberg (aka Sir Rufo)
+ Copyright 2015 Oliver MÃ¼nzberg (aka Sir Rufo)
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
