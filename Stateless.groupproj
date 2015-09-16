@@ -21,6 +21,9 @@
         <Projects Include="Examples\TrafficLight\TrafficLight.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="Examples\TextParser\TextParser.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -83,14 +86,23 @@
     <Target Name="TrafficLight:Make">
         <MSBuild Projects="Examples\TrafficLight\TrafficLight.dproj" Targets="Make"/>
     </Target>
+    <Target Name="TextParser">
+        <MSBuild Projects="Examples\TextParser\TextParser.dproj"/>
+    </Target>
+    <Target Name="TextParser:Clean">
+        <MSBuild Projects="Examples\TextParser\TextParser.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TextParser:Make">
+        <MSBuild Projects="Examples\TextParser\TextParser.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Stateless_Tests;Adventure;BugTracker;Cashier;PhoneCall;TrafficLight"/>
+        <CallTarget Targets="Stateless_Tests;Adventure;BugTracker;Cashier;PhoneCall;TrafficLight;TextParser"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Stateless_Tests:Clean;Adventure:Clean;BugTracker:Clean;Cashier:Clean;PhoneCall:Clean;TrafficLight:Clean"/>
+        <CallTarget Targets="Stateless_Tests:Clean;Adventure:Clean;BugTracker:Clean;Cashier:Clean;PhoneCall:Clean;TrafficLight:Clean;TextParser:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Stateless_Tests:Make;Adventure:Make;BugTracker:Make;Cashier:Make;PhoneCall:Make;TrafficLight:Make"/>
+        <CallTarget Targets="Stateless_Tests:Make;Adventure:Make;BugTracker:Make;Cashier:Make;PhoneCall:Make;TrafficLight:Make;TextParser:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
