@@ -120,6 +120,8 @@ begin
 end;
 
 procedure TShop.ReceiveMessage( const AMessage: TOrderMessage );
+const
+  UnitPrice: Currency = 34;
 var
   LInput    : string;
   LQuantity : Integer;
@@ -127,7 +129,7 @@ var
 begin
   inherited;
   WriteLn( 'Welcome to the shop' );
-  WriteLn( 'The unit price is 34' );
+  WriteLn( 'The unit price is ' + CurrToStr( UnitPrice ) );
   WriteLn( 'You have ', AMessage.Quantity, ' products in your basket' );
   while True do
     begin
@@ -147,7 +149,7 @@ begin
           LProvisory := AMessage.CreateOrder;
           try
             LProvisory.Quantity := LQuantity;
-            LProvisory.Total    := LQuantity * 34;
+            LProvisory.Total    := LQuantity * UnitPrice;
             FBus.SendMessage( LProvisory.CreateOrderMessage, oeOrder );
           finally
             LProvisory.Free;

@@ -55,7 +55,7 @@ procedure TBus.Dispatch(
   const ATransition: TOrderSM.TTransition;
   const AOrderId   : TOrderId );
 begin
-{$IFDEF DEBUG}Writeln( 'LOG Dispatch( ', ATransition.ToString, ', ', AOrderId, ' )' ); {$ENDIF}
+{$IFDEF DEBUG}Writeln( 'LOG ' + Self.ClassName + '.Dispatch( ', ATransition.ToString, ', ', AOrderId, ' )' ); {$ENDIF}
   case ATransition.Destination of
     osNoOrder:
       begin
@@ -97,7 +97,7 @@ procedure TBus.SendMessage(
   const AOrderMessage: TOrderMessage;
   const AOrderEvent  : TOrderEvent );
 begin
-{$IFDEF DEBUG}Writeln( 'LOG SendMessage( ', AOrderMessage.OrderId, ', ', TEnum.AsString( AOrderEvent ), ' )' ); {$ENDIF}
+{$IFDEF DEBUG}Writeln( 'LOG ' + Self.ClassName + '.SendMessage( ', AOrderMessage.OrderId, ', ', TEnum.AsString( AOrderEvent ), ' )' ); {$ENDIF}
   if AOrderEvent = oeAccess
   then
     begin

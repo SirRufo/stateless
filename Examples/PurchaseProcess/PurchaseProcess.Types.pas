@@ -86,7 +86,7 @@ implementation
 
 procedure TResource.ReceiveMessage( const AMessage: TOrderMessage );
 begin
-{$IFDEF DEBUG}Writeln( 'LOG ReceiveMessage( ', AMessage.ToString, ' )' ); {$ENDIF}
+{$IFDEF DEBUG}Writeln( 'LOG ' + Self.ClassName + '.ReceiveMessage( ', AMessage.ToString, ' )' ); {$ENDIF}
 end;
 
 procedure TResource.Subscribe( const ABus: IBus );
