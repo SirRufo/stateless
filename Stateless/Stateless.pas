@@ -1,4 +1,4 @@
-{************************************************************************
+﻿{************************************************************************
  Copyright 2015 Oliver Münzberg (aka Sir Rufo)
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,9 @@ type
         const Source, Destination: TState;
         const Trigger            : TTrigger;
         const StateComparer      : IStateComparer );
+
+      function ToString( ): string;
+
       /// <summary>
       /// The state transitioned from.
       /// </summary>
@@ -1650,6 +1653,12 @@ end;
 function TStateMachine<TState, TTrigger>.TTransition.GetIsReentry: Boolean;
 begin
   Result := FStateComparer.Equals( FSource, FDestination );
+end;
+
+function TStateMachine<TState, TTrigger>.TTransition.ToString: string;
+begin
+  Result := 'Transition { Source:' + TValue.From<TState>( Self.Source ).ToString + ', Destination:' + TValue.From<TState>( Self.Destination ).ToString +
+    ', Trigger:' + TValue.From<TTrigger>( Self.Trigger ).ToString + '}';
 end;
 
 { TStateMachine<TState, TTrigger>.TTriggerBehaviour }
