@@ -24,6 +24,9 @@
         <Projects Include="Examples\TextParser\TextParser.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="Examples\PurchaseProcess\PurchaseProcess.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -95,14 +98,23 @@
     <Target Name="TextParser:Make">
         <MSBuild Projects="Examples\TextParser\TextParser.dproj" Targets="Make"/>
     </Target>
+    <Target Name="PurchaseProcess">
+        <MSBuild Projects="Examples\PurchaseProcess\PurchaseProcess.dproj"/>
+    </Target>
+    <Target Name="PurchaseProcess:Clean">
+        <MSBuild Projects="Examples\PurchaseProcess\PurchaseProcess.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="PurchaseProcess:Make">
+        <MSBuild Projects="Examples\PurchaseProcess\PurchaseProcess.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Stateless_Tests;Adventure;BugTracker;Cashier;PhoneCall;TrafficLight;TextParser"/>
+        <CallTarget Targets="Stateless_Tests;Adventure;BugTracker;Cashier;PhoneCall;TrafficLight;TextParser;PurchaseProcess"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Stateless_Tests:Clean;Adventure:Clean;BugTracker:Clean;Cashier:Clean;PhoneCall:Clean;TrafficLight:Clean;TextParser:Clean"/>
+        <CallTarget Targets="Stateless_Tests:Clean;Adventure:Clean;BugTracker:Clean;Cashier:Clean;PhoneCall:Clean;TrafficLight:Clean;TextParser:Clean;PurchaseProcess:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Stateless_Tests:Make;Adventure:Make;BugTracker:Make;Cashier:Make;PhoneCall:Make;TrafficLight:Make;TextParser:Make"/>
+        <CallTarget Targets="Stateless_Tests:Make;Adventure:Make;BugTracker:Make;Cashier:Make;PhoneCall:Make;TrafficLight:Make;TextParser:Make;PurchaseProcess:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
